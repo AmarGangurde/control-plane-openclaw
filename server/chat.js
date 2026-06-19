@@ -24,8 +24,8 @@ const CMD_RE = /<wrexer>([\s\S]*?)<\/wrexer>/g;
 
 function getProvider() {
   if (process.env.ANTHROPIC_API_KEY) return 'anthropic';
-  if (process.env.OPENAI_API_KEY)    return 'openai';
-  if (process.env.GEMINI_API_KEY)    return 'gemini';
+  if (process.env.OPENAI_API_KEY) return 'openai';
+  if (process.env.GEMINI_API_KEY) return 'gemini';
   return null;
 }
 
@@ -69,13 +69,13 @@ async function streamAnthropic(messages, onChunk) {
 async function streamGemini(messages, onChunk) {
   const { GoogleGenerativeAI } = await import('@google/generative-ai');
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  
+
   const [sysMsg, ...rest] = messages;
   const isSys = sysMsg.role === 'system';
   const systemInstruction = isSys ? sysMsg.content : undefined;
-  
+
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-3.1-flash-lite',
     systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
   });
 
@@ -88,7 +88,7 @@ async function streamGemini(messages, onChunk) {
 
   const chat = model.startChat({ history });
   const result = await chat.sendMessageStream(lastMsg.content || ' ');
-  
+
   let full = '';
   for await (const chunk of result.stream) {
     const text = chunk.text();
