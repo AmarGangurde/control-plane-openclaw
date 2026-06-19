@@ -215,5 +215,31 @@ function showWelcome() {
   `;
 }
 
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/history');
+    const history = await res.json();
+    if (history && history.length > 0) {
+      msgs.innerHTML = ''; // clear any existing messages
+      history.forEach(entry => {
+        if (entry.role === 'user') {
+          appendUserMsg(entry.content);
+        } else if (entry.role === 'assistant') {
+          // Check if it's a tool execution block or just text.
+          // For simplicity, just render it as an agent bubble.
+          // <wrexer> tags might be visible in the text, which is fine for history.
+          const bubble = appendAgentBubble('');
+          bubble.textContent = entry.content;
+        }
+      });
+    } else {
+      showWelcome();
+    }
+  } catch (err) {
+    console.error('Failed to load history:', err);
+    showWelcome();
+  }
+}
+
 connect();
-showWelcome();
+loadHistory();

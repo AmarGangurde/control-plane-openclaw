@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
-import { handleChat } from './chat.js';
+import { handleChat, loadHistory } from './chat.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(__dirname, '../public');
@@ -41,7 +41,14 @@ const MIME = {
   '.json': 'application/json',
 };
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  if (req.url === '/api/history') {
+    const history = await loadHistory();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(history));
+    return;
+  }
+
   let filePath = req.url === '/' ? '/index.html' : req.url;
   filePath = path.join(PUBLIC, filePath);
 

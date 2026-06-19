@@ -126,7 +126,7 @@ async function runCommand(cmd) {
 
 // ── History ───────────────────────────────────────────────────────────────────
 
-async function loadHistory() {
+export async function loadHistory() {
   try {
     const raw = await fs.readFile(HISTORY_FILE, 'utf8');
     return raw.trim().split('\n').filter(Boolean).map(l => JSON.parse(l));
