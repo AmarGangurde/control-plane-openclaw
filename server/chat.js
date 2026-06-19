@@ -117,7 +117,10 @@ async function runCommand(cmd) {
     });
     return { stdout: stdout.trim(), stderr: stderr.trim(), code: 0 };
   } catch (e) {
-    return { stdout: e.stdout?.trim() || '', stderr: e.stderr?.trim() || e.message, code: e.code || 1 };
+    const stdout = e.stdout?.trim() || '';
+    const stderr = e.stderr?.trim() || '';
+    const message = (stdout === '' && stderr === '') ? `Exited with code ${e.code || 1}` : e.message;
+    return { stdout, stderr: stderr || message, code: e.code || 1 };
   }
 }
 
