@@ -191,7 +191,10 @@ export async function handleChat(ws, userMessage) {
       const cmd = match[1].trim();
       send({ type: 'cmd_start', command: cmd });
       const result = await runCommand(cmd);
-      const output = result.stdout || result.stderr || '(no output)';
+      const outputParts = [];
+      if (result.stdout) outputParts.push(result.stdout);
+      if (result.stderr) outputParts.push(result.stderr);
+      const output = outputParts.length > 0 ? outputParts.join('\n') : '(no output)';
       send({ type: 'cmd_result', command: cmd, output, exitCode: result.code });
       toolResults += `\n[Tool: ${cmd}]\nExit: ${result.code}\n${output}\n`;
     }

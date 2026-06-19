@@ -41,6 +41,7 @@ const cli = yargs(hideBin(process.argv))
     .option('image', { alias: 'i', type: 'string', describe: 'Docker image (e.g. user/app:1.0)', demandOption: true })
     .option('port',  { alias: 'p', type: 'number', describe: 'Port your container listens on', demandOption: true })
     .option('plan',  { type: 'string', describe: 'Plan ID (default: small)', default: 'small' })
+    .option('env',   { alias: 'e', type: 'array', describe: 'Environment variables (e.g. KEY=value)' })
   , async argv => {
     await deploy(argv).catch(e => err(e.message));
   })

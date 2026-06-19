@@ -5,7 +5,7 @@ import chalk from 'chalk';
 const VALID_PLANS = ['tiny', 'small', 'basic', 'medium', 'large', 'xlarge',
                      'p-tiny', 'p-small', 'p-basic', 'p-medium', 'p-large', 'p-xlarge'];
 
-export async function deploy({ name, image, port, plan = 'small' }) {
+export async function deploy({ name, image, port, plan = 'small', env }) {
   if (!name)  err('--name is required');
   if (!image) err('--image is required');
   if (!port)  err('--port is required');
@@ -23,7 +23,21 @@ export async function deploy({ name, image, port, plan = 'small' }) {
   }
 
   info(`Deploying ${chalk.white.bold(name)} (${image} on port ${port}, plan: ${planId})…`);
-  const d = await api.post('/deploy', { name, image, port: parseInt(port), planId });
+
+  let envArray = null;
+  if (env) {
+    envArray = [];
+    const envs = Array.isArray(env) ? env : [env];
+    for (const e of envs) {
+      const idx = e.indexOf('=');
+      if (idx > 0) {
+        envArray.push({ name: e.slice(0, idx), value: e.slice(idx + 1) });
+      }
+    }
+    if (envArray.length === 0) envArray = null;
+  }
+
+  const d = await api.post('/deploy', { name, image, port: parseInt(port), planId, env: envArray });
 
   ok(`Deployed!`);
   info(`App ID:  ${d.appId || d.id}`);
