@@ -33,7 +33,7 @@ async function streamOpenAI(messages, onChunk) {
   const { default: OpenAI } = await import('openai');
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const stream = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: process.env.LLM_MODEL || 'gpt-4o-mini',
     messages,
     stream: true,
     max_tokens: 4096,
@@ -51,7 +51,7 @@ async function streamAnthropic(messages, onChunk) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const [sysMsg, ...rest] = messages;
   const stream = client.messages.stream({
-    model: 'claude-3-5-haiku-20241022',
+    model: process.env.LLM_MODEL || 'claude-3-5-haiku-20241022',
     system: sysMsg.role === 'system' ? sysMsg.content : undefined,
     messages: sysMsg.role === 'system' ? rest : messages,
     max_tokens: 4096,
@@ -75,7 +75,7 @@ async function streamGemini(messages, onChunk) {
   const systemInstruction = isSys ? sysMsg.content : undefined;
 
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3.1-flash-lite',
+    model: process.env.LLM_MODEL || 'gemini-3.1-flash-lite',
     systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
   });
 
