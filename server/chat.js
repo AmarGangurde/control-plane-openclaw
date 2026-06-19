@@ -66,10 +66,42 @@ async function streamAnthropic(messages, onChunk) {
   return full;
 }
 
+async function streamGemini(messages, onChunk) {
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  
+  const [sysMsg, ...rest] = messages;
+  const isSys = sysMsg.role === 'system';
+  const systemInstruction = isSys ? sysMsg.content : undefined;
+  
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+  });
+
+  const chatMessages = isSys ? rest : messages;
+  const history = chatMessages.slice(0, -1).map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content || ' ' }],
+  }));
+  const lastMsg = chatMessages[chatMessages.length - 1];
+
+  const chat = model.startChat({ history });
+  const result = await chat.sendMessageStream(lastMsg.content || ' ');
+  
+  let full = '';
+  for await (const chunk of result.stream) {
+    const text = chunk.text();
+    if (text) { full += text; onChunk(text); }
+  }
+  return full;
+}
+
 async function callLLM(messages, onChunk) {
   const provider = getProvider();
   if (!provider) throw new Error('No LLM API key set. Add OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY in the workspace settings.');
   if (provider === 'anthropic') return streamAnthropic(messages, onChunk);
+  if (provider === 'gemini') return streamGemini(messages, onChunk);
   return streamOpenAI(messages, onChunk);
 }
 
