@@ -161,24 +161,32 @@ export async function handleChat(ws, userMessage) {
 
   await appendHistory({ role: 'user', content: userMessage });
 
-  // Stream LLM response
-  send({ type: 'thinking' });
-  let assistantReply = '';
-  try {
-    assistantReply = await callLLM(messages, (chunk) => {
-      send({ type: 'stream', content: chunk });
-    });
-  } catch (e) {
-    send({ type: 'error', content: e.message });
-    return;
-  }
-  send({ type: 'stream_end' });
+  let combinedAssistantReply = '';
+  let loopCount = 0;
+  const MAX_LOOPS = 5;
 
-  // Extract and run <wrexer> commands
-  const cmdMatches = [...assistantReply.matchAll(CMD_RE)];
-  let toolResults = '';
+  while (loopCount < MAX_LOOPS) {
+    send({ type: 'thinking' });
+    let assistantReply = '';
+    try {
+      assistantReply = await callLLM(messages, (chunk) => {
+        send({ type: 'stream', content: chunk });
+      });
+    } catch (e) {
+      send({ type: 'error', content: e.message });
+      return;
+    }
+    send({ type: 'stream_end' });
 
-  if (cmdMatches.length > 0) {
+    if (combinedAssistantReply) combinedAssistantReply += '\n\n';
+    combinedAssistantReply += assistantReply;
+
+    const cmdMatches = [...assistantReply.matchAll(CMD_RE)];
+    if (cmdMatches.length === 0) {
+      break;
+    }
+
+    let toolResults = '';
     for (const match of cmdMatches) {
       const cmd = match[1].trim();
       send({ type: 'cmd_start', command: cmd });
@@ -188,27 +196,12 @@ export async function handleChat(ws, userMessage) {
       toolResults += `\n[Tool: ${cmd}]\nExit: ${result.code}\n${output}\n`;
     }
 
-    // Follow-up LLM call with tool results
     messages.push({ role: 'assistant', content: assistantReply });
     messages.push({ role: 'user', content: `Tool results:${toolResults}\nContinue based on these results.` });
-
-    send({ type: 'thinking' });
-    let followUp = '';
-    try {
-      followUp = await callLLM(messages, (chunk) => {
-        send({ type: 'stream', content: chunk });
-      });
-    } catch (e) {
-      send({ type: 'error', content: e.message });
-      return;
-    }
-    send({ type: 'stream_end' });
-
-    // Save combined assistant reply
-    await appendHistory({ role: 'assistant', content: assistantReply + '\n' + followUp });
-  } else {
-    await appendHistory({ role: 'assistant', content: assistantReply });
+    
+    loopCount++;
   }
 
+  await appendHistory({ role: 'assistant', content: combinedAssistantReply });
   send({ type: 'done' });
 }
