@@ -9,8 +9,9 @@ RUN npm install --omit=dev
 # Copy all source files
 COPY . .
 
-# Install wrexer CLI globally in the image
-RUN chmod +x cli/wrexer.js \
+# Install wrexer CLI globally and docker-cli
+RUN apk update && apk add --no-cache docker-cli \
+    && chmod +x cli/wrexer.js \
     && ln -sf /app/cli/wrexer.js /usr/local/bin/wrexer
 
 # Create workspace directory (will be overridden by PVC at runtime)

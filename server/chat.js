@@ -109,12 +109,9 @@ async function callLLM(messages, onChunk) {
 
 async function runCommand(cmd) {
   const trimmed = cmd.trim();
-  // Security: only allow wrexer commands
-  if (!trimmed.startsWith('wrexer ') && trimmed !== 'wrexer') {
-    return { stdout: '', stderr: 'Only wrexer commands are allowed.', code: 1 };
-  }
   try {
     const { stdout, stderr } = await execAsync(trimmed, {
+      cwd: '/workspace',
       timeout: 60000,
       env: { ...process.env, FORCE_COLOR: '0' },
     });
