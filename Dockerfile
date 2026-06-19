@@ -1,0 +1,21 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy all source files
+COPY . .
+
+# Install wrexer CLI globally in the image
+RUN chmod +x cli/wrexer.js \
+    && ln -sf /app/cli/wrexer.js /usr/local/bin/wrexer
+
+# Create workspace directory (will be overridden by PVC at runtime)
+RUN mkdir -p /workspace
+
+EXPOSE 18789
+
+CMD ["node", "server/index.js"]
