@@ -3,8 +3,6 @@ name: Build & Push OpenClaw Image
 on:
   push:
     branches: [main]
-    paths:
-      - 'openclaw/**'
 
 env:
   REGISTRY: ghcr.io
@@ -30,7 +28,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./openclaw
+          context: .
           push: true
           tags: |
             ${{ env.IMAGE }}:latest
