@@ -8,7 +8,8 @@ const input    = document.getElementById('input');
 const sendBtn  = document.getElementById('sendBtn');
 const statusDot = document.getElementById('statusDot');
 
-const WS_URL = `ws://${location.host}/ws`;
+const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = `${protocol}//${location.host}/ws`;
 let ws, currentBubble = null, busy = false;
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
