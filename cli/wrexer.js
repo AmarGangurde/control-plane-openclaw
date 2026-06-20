@@ -15,6 +15,8 @@ import { listApps, listDatabases }    from './commands/list.js';
 import { stopApp, stopDatabase }      from './commands/stop.js';
 import { deleteApp, deleteDatabase }  from './commands/delete.js';
 import { waitApp }                    from './commands/wait.js';
+import { logs }                       from './commands/logs.js';
+import { docs }                       from './commands/docs.js';
 import { err } from './lib/format.js';
 
 const cli = yargs(hideBin(process.argv))
@@ -91,6 +93,18 @@ const cli = yargs(hideBin(process.argv))
     .positional('id',       { type: 'string', describe: 'App ID' })
   , async argv => {
     await waitApp(argv.id).catch(e => err(e.message));
+  })
+
+  // ── logs ──────────────────────────────────────────────────────────────────
+  .command('logs <id>', 'View container logs for an app or database', y => y
+    .positional('id',       { type: 'string', describe: 'App or DB ID' })
+  , async argv => {
+    await logs(argv.id).catch(e => err(e.message));
+  })
+
+  // ── docs ──────────────────────────────────────────────────────────────────
+  .command('docs', 'Read the Wrexer Developer & Architecture Guide', {}, async () => {
+    await docs().catch(e => err(e.message));
   })
 
   .demandCommand(1, 'Please specify a command. Run wrexer --help for usage.')

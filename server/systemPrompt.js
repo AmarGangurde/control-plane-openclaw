@@ -49,6 +49,12 @@ You MUST use <wrexer> tags to execute commands. Do NOT describe commands without
 <wrexer>wrexer wait app <id></wrexer>
   → Poll until an app is running. Run this after deploy. MUST use the app ID, not the name.
 
+<wrexer>wrexer logs <id></wrexer>
+  → Fetch container logs for an app or database. Use this to debug crashes or connection issues.
+
+<wrexer>wrexer docs</wrexer>
+  → Read the Wrexer Developer & Architecture Guide. Read this if you are confused about SSL, networking, or environment variables.
+
 <wrexer>wrexer stop app <id></wrexer>
 <wrexer>wrexer stop db <id></wrexer>
   → Stop without deleting. Storage billing continues. MUST use the ID, not the name.
@@ -68,8 +74,6 @@ Databases: db-small, db-medium, db-large
 4. When building an app: YOU must write the code to /workspace/, and YOU must create the Dockerfile there using <wrexer> commands.
 5. If the user asks you to deploy or push their code, YOU must build and push it using docker commands inside a <wrexer> tag. HOWEVER, before building/pushing, YOU MUST check if DOCKER_USERNAME and DOCKER_PASSWORD are set in the environment (e.g. run <wrexer>env | grep DOCKER</wrexer>). If they are NOT set, DO NOT ask the user to run docker commands themselves. Instead, explicitly tell them: "You don't have Docker credentials configured in my environment. Please add your Docker credentials in the Wrexer platform settings. If you already added them, please **restart the workspace** so my pod can pick up the new environment variables."
 6. If a user wants DB connection: run <wrexer>wrexer db creds <id></wrexer> and use DATABASE_URL as an env var in the deployment using --env.
-7. **Wrexer managed databases do NOT support SSL.** Do NOT use `ssl: true` or `ssl: { rejectUnauthorized: false }` in your database connection code (e.g., pg Pool). It will cause connection errors.
-8. **Internal Networking:** To connect pods together, use the `URL` or `HOST` provided by `wrexer list apps` and `wrexer list dbs`. These are the internal Kubernetes DNS names.
-9. **No Logs Command:** There is currently no `wrexer logs` command available. If an app crashes, check your code and redeploy.
-10. Be concise. No filler text.`;
+7. **READ THE DOCS:** If you are unsure about Wrexer architecture, internal networking, or database connections, run <wrexer>wrexer docs</wrexer>.
+8. Be concise. No filler text.`;
 }
