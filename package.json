@@ -1,6 +1,6 @@
 {
   "name": "openclaw",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "OpenClaw AI infrastructure workspace for Wrexer",
   "type": "module",
   "bin": {
