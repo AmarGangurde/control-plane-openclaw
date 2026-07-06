@@ -10,6 +10,7 @@ import { hideBin } from 'yargs/helpers';
 import { context }                    from './commands/context.js';
 import { estimate }                   from './commands/estimate.js';
 import { deploy }                     from './commands/deploy.js';
+import { updateApp }                  from './commands/update.js';
 import { dbCreate, dbCreds }          from './commands/database.js';
 import { listApps, listDatabases }    from './commands/list.js';
 import { stopApp, stopDatabase }      from './commands/stop.js';
@@ -48,10 +49,22 @@ const cli = yargs(hideBin(process.argv))
     await deploy(argv).catch(e => err(e.message));
   })
 
+  // ── update ────────────────────────────────────────────────────────────────
+  .command('update <resource> <nameOrId>', 'Update an existing app in-place', y => y
+    .positional('resource',  { choices: ['app'], describe: 'app' })
+    .positional('nameOrId',  { type: 'string', describe: 'App name or ID' })
+    .option('image', { alias: 'i', type: 'string', describe: 'New Docker image' })
+    .option('port',  { alias: 'p', type: 'number', describe: 'New container port' })
+    .option('plan',  { type: 'string', describe: 'New plan ID' })
+    .option('env',   { alias: 'e', type: 'array', describe: 'Environment variables (KEY=value)' })
+  , async argv => {
+    await updateApp({ nameOrId: argv.nameOrId, ...argv }).catch(e => err(e.message));
+  })
+
   // ── db ────────────────────────────────────────────────────────────────────
   .command('db <action> [id]', 'Manage databases', y => y
     .positional('action', { choices: ['create', 'creds'], describe: 'create | creds' })
-    .positional('id',     { type: 'string', describe: 'Database ID (for creds)' })
+    .positional('id',     { type: 'string', describe: 'Database name or ID (for creds)' })
     .option('name', { alias: 'n', type: 'string', describe: 'Database name (for create)' })
     .option('plan', { type: 'string', describe: 'DB plan (default: db-small)', default: 'db-small' })
   , async argv => {
@@ -69,37 +82,37 @@ const cli = yargs(hideBin(process.argv))
   })
 
   // ── stop ──────────────────────────────────────────────────────────────────
-  .command('stop <resource> <id>', 'Stop an app or database', y => y
-    .positional('resource', { choices: ['app', 'db'], describe: 'app | db' })
-    .positional('id',       { type: 'string', describe: 'Resource ID' })
+  .command('stop <resource> <nameOrId>', 'Stop a database (apps cannot be stopped, only deleted/updated)', y => y
+    .positional('resource',  { choices: ['app', 'db'], describe: 'app | db' })
+    .positional('nameOrId',  { type: 'string', describe: 'Resource name or ID' })
   , async argv => {
-    if (argv.resource === 'app') await stopApp(argv.id).catch(e => err(e.message));
-    else await stopDatabase(argv.id).catch(e => err(e.message));
+    if (argv.resource === 'app') await stopApp(argv.nameOrId).catch(e => err(e.message));
+    else await stopDatabase(argv.nameOrId).catch(e => err(e.message));
   })
 
   // ── delete ────────────────────────────────────────────────────────────────
-  .command('delete <resource> <id>', 'Permanently delete an app or database', y => y
+  .command('delete <resource> <nameOrId>', 'Permanently delete an app or database', y => y
     .positional('resource', { choices: ['app', 'db'], describe: 'app | db' })
-    .positional('id',       { type: 'string', describe: 'Resource ID' })
+    .positional('nameOrId', { type: 'string', describe: 'Resource name or ID' })
     .option('confirm',      { type: 'boolean', describe: 'Required to confirm deletion', default: false })
   , async argv => {
-    if (argv.resource === 'app') await deleteApp(argv.id, argv).catch(e => err(e.message));
-    else await deleteDatabase(argv.id, argv).catch(e => err(e.message));
+    if (argv.resource === 'app') await deleteApp(argv.nameOrId, argv).catch(e => err(e.message));
+    else await deleteDatabase(argv.nameOrId, argv).catch(e => err(e.message));
   })
 
   // ── wait ──────────────────────────────────────────────────────────────────
-  .command('wait <resource> <id>', 'Wait until a resource is running', y => y
-    .positional('resource', { choices: ['app'], describe: 'app' })
-    .positional('id',       { type: 'string', describe: 'App ID' })
+  .command('wait <resource> <nameOrId>', 'Wait until a resource is running', y => y
+    .positional('resource',  { choices: ['app'], describe: 'app' })
+    .positional('nameOrId',  { type: 'string', describe: 'App name or ID' })
   , async argv => {
-    await waitApp(argv.id).catch(e => err(e.message));
+    await waitApp(argv.nameOrId).catch(e => err(e.message));
   })
 
   // ── logs ──────────────────────────────────────────────────────────────────
-  .command('logs <id>', 'View container logs for an app or database', y => y
-    .positional('id',       { type: 'string', describe: 'App or DB ID' })
+  .command('logs <nameOrId>', 'View container logs for an app or database', y => y
+    .positional('nameOrId', { type: 'string', describe: 'App or DB name/ID' })
   , async argv => {
-    await logs(argv.id).catch(e => err(e.message));
+    await logs(argv.nameOrId).catch(e => err(e.message));
   })
 
   // ── docs ──────────────────────────────────────────────────────────────────
@@ -110,6 +123,6 @@ const cli = yargs(hideBin(process.argv))
   .demandCommand(1, 'Please specify a command. Run wrexer --help for usage.')
   .help()
   .alias('h', 'help')
-  .version('1.0.0');
+  .version('1.0.6');
 
 cli.parse();

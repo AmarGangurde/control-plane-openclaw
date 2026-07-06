@@ -1,21 +1,25 @@
-import { api } from '../lib/api.js';
+import { api, resolveAppId } from '../lib/api.js';
 import { ok, err } from '../lib/format.js';
 import chalk from 'chalk';
 
 const POLL_INTERVAL = 4000;
 const MAX_WAIT = 5 * 60 * 1000; // 5 minutes
 
-export async function waitApp(id) {
-  if (!id) err('<id> is required (use: wrexer wait app <id>)');
+export async function waitApp(nameOrId) {
+  if (!nameOrId) err('<name|id> is required (use: wrexer wait app <name>)');
+
+  // Resolve name → ID once before the polling loop
+  const id = await resolveAppId(nameOrId);
 
   const start = Date.now();
-  process.stdout.write(`   Waiting for app ${chalk.cyan(id)} to be running`);
+  process.stdout.write(`   Waiting for app ${chalk.cyan(nameOrId)} to be running`);
 
   while (Date.now() - start < MAX_WAIT) {
-    const { apps } = await api.get('/apps');
-    const app = apps.find(a => a.id === id || a.id.startsWith(id));
+    const data = await api.get('/apps');
+    const apps = data.apps || data;
+    const app = apps.find(a => a.id === id);
 
-    if (!app) { console.log(''); err(`App ${id} not found.`); }
+    if (!app) { console.log(''); err(`App not found.`); }
 
     if (app.status === 'running') {
       console.log('');
@@ -26,7 +30,7 @@ export async function waitApp(id) {
     }
     if (app.status === 'failed') {
       console.log('');
-      err(`App ${app.name} failed to start. Check logs.`);
+      err(`App ${app.name} failed to start. Run: wrexer logs ${app.name}`);
     }
 
     process.stdout.write(chalk.gray('.'));
