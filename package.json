@@ -1,7 +1,7 @@
 {
-  "name": "openclaw",
-  "version": "1.0.4",
-  "description": "OpenClaw AI infrastructure workspace for Wrexer",
+  "name": "wrexforge",
+  "version": "1.0.5",
+  "description": "WrexForge AI infrastructure workspace for Wrexer",
   "type": "module",
   "bin": {
     "wrexer": "./cli/wrexer.js"

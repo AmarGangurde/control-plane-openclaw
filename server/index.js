@@ -1,5 +1,5 @@
 /**
- * index.js — OpenClaw HTTP + WebSocket server on port 18789.
+ * index.js — WrexForge HTTP + WebSocket server on port 18789.
  * Serves the chat UI and handles WebSocket chat sessions.
  */
 
@@ -97,7 +97,7 @@ wss.on('connection', (ws) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 await ensureWorkspaceDefaults();
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`OpenClaw workspace running on port ${PORT}`);
+  console.log(`WrexForge workspace running on port ${PORT}`);
   console.log(`API: ${process.env.WREXER_API_URL || 'https://wrexer.com/api'}`);
   console.log(`Namespace: ${process.env.WREXER_NAMESPACE || '(not set)'}`);
 });

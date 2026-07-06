@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * wrexer.js — Main CLI entrypoint
- * Installed as /usr/local/bin/wrexer inside the OpenClaw pod.
+ * Installed as /usr/local/bin/wrexer inside the WrexForge pod.
  * Usage: wrexer <command> [options]
  */
 

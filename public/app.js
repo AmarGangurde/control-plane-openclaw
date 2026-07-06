@@ -1,5 +1,5 @@
 /**
- * app.js — WebSocket chat client for the OpenClaw UI.
+ * app.js — WebSocket chat client for the WrexForge UI.
  * Handles streaming, tool execution blocks, and history display.
  */
 
@@ -98,7 +98,7 @@ function appendAgentBubble(text) {
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
   bubble.textContent = text;
-  div.innerHTML = `<span class="label">OpenClaw</span>`;
+  div.innerHTML = `<span class="label">WrexForge</span>`;
   div.appendChild(bubble);
   msgs.appendChild(div);
   scrollBottom();
@@ -109,7 +109,7 @@ function appendThinking() {
   const div = document.createElement('div');
   div.className = 'msg agent';
   div.id = 'thinking';
-  div.innerHTML = `<span class="label">OpenClaw</span>
+  div.innerHTML = `<span class="label">WrexForge</span>
     <div class="thinking">
       <div class="dots"><span></span><span></span><span></span></div>
       <span>Thinking…</span>
@@ -206,7 +206,7 @@ input.addEventListener('input', () => {
 function showWelcome() {
   const bubble = appendAgentBubble('');
   bubble.innerHTML = `
-    👋 <strong>Welcome to your OpenClaw Workspace!</strong><br><br>
+    👋 <strong>Welcome to your WrexForge Workspace!</strong><br><br>
     I'm your AI infrastructure assistant. I can help you:<br>
     • Build and deploy applications<br>
     • Provision databases<br>

@@ -1,4 +1,4 @@
-name: Build & Push OpenClaw Image
+name: Build & Push WrexForge Image
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE: ghcr.io/amargangurde/openclaw
+  IMAGE: ghcr.io/amargangurde/wrexforge
 
 jobs:
   build:
