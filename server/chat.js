@@ -150,7 +150,7 @@ async function callGemini(messages, onChunk) {
   }];
 
   const model = genAI.getGenerativeModel({
-    model: process.env.LLM_MODEL || 'gemini-2.0-flash',
+    model: process.env.LLM_MODEL || 'gemini-3.1-flash-lite',
     systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
     tools,
   });
