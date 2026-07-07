@@ -28,8 +28,37 @@ async function ensureWorkspaceDefaults() {
         console.log(`Copied workspace default: ${f}`);
       }
     }
+    }
   } catch (e) {
     console.warn('Could not copy workspace defaults:', e.message);
+  }
+}
+
+// ── Docker Auto-Login ─────────────────────────────────────────────────────────
+async function ensureDockerLogin() {
+  const { DOCKER_USERNAME, DOCKER_PASSWORD } = process.env;
+  if (!DOCKER_USERNAME || !DOCKER_PASSWORD) return;
+
+  try {
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+    
+    console.log(`Attempting automatic docker login for user: ${DOCKER_USERNAME}...`);
+    // Wait for docker daemon to be ready (up to 5 seconds)
+    for (let i = 0; i < 5; i++) {
+      try {
+        await execAsync('docker info', { timeout: 1000 });
+        break;
+      } catch (e) {
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+    
+    await execAsync(`echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin`, { timeout: 10000 });
+    console.log('✅ Docker auto-login successful');
+  } catch (e) {
+    console.error('❌ Docker auto-login failed:', e.message);
   }
 }
 
@@ -96,6 +125,7 @@ wss.on('connection', (ws) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 await ensureWorkspaceDefaults();
+await ensureDockerLogin();
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`WrexForge workspace running on port ${PORT}`);
   console.log(`API: ${process.env.WREXER_API_URL || 'https://wrexer.com/api'}`);
