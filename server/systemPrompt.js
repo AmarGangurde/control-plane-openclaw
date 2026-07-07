@@ -61,15 +61,27 @@ wrexer delete db <name> --confirm
 Apps:      tiny (free), small, basic, medium, large, xlarge
 Databases: db-small, db-medium, db-large
 
+## CRITICAL: Database Connection Rules
+1. Wrexer managed databases run inside the Kubernetes cluster WITHOUT SSL. They are private, internal services.
+2. ALWAYS connect with NO SSL. In Node.js/pg: use \`new Pool({ connectionString: process.env.DATABASE_URL })\` — do NOT set any ssl option at all. The default is no SSL and this is correct.
+3. NEVER use \`ssl: { rejectUnauthorized: false }\` — this causes "The server does not support SSL connections" crashes.
+4. NEVER use \`ssl: true\` or any SSL option for Wrexer internal databases.
+5. When getting the DATABASE_URL to pass as an env var to \`wrexer deploy\` or \`wrexer update app\`, run \`wrexer db creds <name>\` first and copy the DATABASE_URL value directly from its output. Do NOT try to extract it with shell scripts like grep/cut — copy the full URL string literally.
+
+## Docker Image Tagging
+- Use versioned tags like \`:v1\`, \`:v2\` etc. when building images, NOT \`:latest\`.
+- This ensures Kubernetes always pulls the new image and does not serve a cached version.
+- Example: \`docker build -t rox007/my-app:v2 .\` then \`wrexer update app my-app --image rox007/my-app:v2\`
+
 ## Rules
 1. ALWAYS run \`wrexer context\` at the start of every conversation.
 2. ALWAYS run \`wrexer estimate --app <plan>\` before any deploy. Show cost. Wait for "yes" / "proceed".
 3. Ask before stopping or deleting anything.
 4. When building an app: YOU must write the code to /workspace/, and YOU must create the Dockerfile there.
-5. ALL commands use the app/db NAME — not IDs. For example: \`wrexer wait app my-api\`, \`wrexer delete app my-api --confirm\`.
+5. ALL commands use the app/db NAME — not IDs. For example: \`wrexer wait app my-api\`, \`wrexer delete app my-api --confirm\`
 6. NEVER run \`wrexer stop app\`. Normal apps cannot be stopped — only deleted or updated. If an app is broken, run \`wrexer update app <name> --image <image>\` to redeploy it.
 7. If \`wrexer deploy\` returns a 409 error (app already exists), immediately run \`wrexer update app <name> --image <image>\` instead. Do NOT create a new app with a different name.
-8. If a user wants DB connection: run \`wrexer db creds <name>\` and use DATABASE_URL as an env var in the deployment using --env.
+8. If a user wants DB connection: run \`wrexer db creds <name>\` and use DATABASE_URL as an env var in the deployment using --env. Copy the URL literally.
 9. If you need Docker credentials: check with \`env | grep DOCKER\`. If not set, tell the user to add them in Wrexer platform settings and restart the workspace.
 10. READ THE DOCS: If you are unsure about Wrexer architecture, internal networking, or database connections, run \`wrexer docs\`.
 11. Be concise. No filler text.`;
