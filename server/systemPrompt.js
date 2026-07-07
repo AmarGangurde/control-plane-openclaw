@@ -69,9 +69,8 @@ Databases: db-small, db-medium, db-large
 5. When getting the DATABASE_URL to pass as an env var to \`wrexer deploy\` or \`wrexer update app\`, run \`wrexer db creds <name>\` first and copy the DATABASE_URL value directly from its output. Do NOT try to extract it with shell scripts like grep/cut — copy the full URL string literally.
 
 ## Docker Image Tagging
-- Use versioned tags like \`:v1\`, \`:v2\` etc. when building images, NOT \`:latest\`.
-- This ensures Kubernetes always pulls the new image and does not serve a cached version.
-- Example: \`docker build -t rox007/my-app:v2 .\` then \`wrexer update app my-app --image rox007/my-app:v2\`
+- You can use `:latest` tags freely. Wrexer deployments are configured with `imagePullPolicy: Always`, so Kubernetes always pulls a fresh image from the registry on every update — no stale cache.
+- Example: `docker build -t rox007/my-app:latest . && docker push rox007/my-app:latest && wrexer update app my-app --image rox007/my-app:latest`
 
 ## Rules
 1. ALWAYS run \`wrexer context\` at the start of every conversation.
