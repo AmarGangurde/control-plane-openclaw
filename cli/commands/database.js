@@ -1,4 +1,4 @@
-import { api } from '../lib/api.js';
+import { api, resolveDbId } from '../lib/api.js';
 import { ok, err, info } from '../lib/format.js';
 import chalk from 'chalk';
 
@@ -21,13 +21,14 @@ export async function dbCreate({ name, plan = 'db-small' }) {
   info(`Port:     ${d.port}`);
   info(`DB Name:  ${d.db_name}`);
   info(`DB User:  ${d.db_user}`);
-  info(`Password: (use: wrexer db creds ${d.id})`);
+  info(`Password: (use: wrexer db creds ${name})`);
   console.log('');
 }
 
-export async function dbCreds(id) {
-  if (!id) err('<id> is required (use: wrexer db creds <id>)');
-  const d = await api.get(`/databases/${id}/creds`);
+export async function dbCreds(nameOrId) {
+  if (!nameOrId) err('<name|id> is required (use: wrexer db creds <name>)');
+  const resolvedId = await resolveDbId(nameOrId);
+  const d = await api.get(`/databases/${resolvedId}/creds`);
 
   console.log('');
   info(`DATABASE_URL=${chalk.white(d.database_url)}`);
