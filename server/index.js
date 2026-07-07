@@ -28,7 +28,6 @@ async function ensureWorkspaceDefaults() {
         console.log(`Copied workspace default: ${f}`);
       }
     }
-    }
   } catch (e) {
     console.warn('Could not copy workspace defaults:', e.message);
   }
