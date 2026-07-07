@@ -156,10 +156,15 @@ async function callGemini(messages, onChunk) {
   });
 
   const chatMessages = isSys ? rest : messages;
-  const history = chatMessages.slice(0, -1).map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: m.parts || [{ text: m.content || ' ' }],
-  }));
+  const history = chatMessages.slice(0, -1).map(m => {
+    let r = m.role;
+    if (r === 'assistant') r = 'model';
+    else if (r !== 'function') r = 'user';
+    return {
+      role: r,
+      parts: m.parts || [{ text: m.content || ' ' }],
+    };
+  });
   const lastMsg = chatMessages[chatMessages.length - 1];
 
   const chat = model.startChat({ history });
@@ -264,7 +269,7 @@ function buildToolResultMessages(provider, messages, result, command, toolUseId)
       parts: [{ functionCall: { name: TOOL_NAME, args: { command } } }],
     });
     messages.push({
-      role: 'user',
+      role: 'function',
       parts: [{ functionResponse: { name: TOOL_NAME, response: { output: toolResult } } }],
     });
   }

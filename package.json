@@ -1,6 +1,6 @@
 {
   "name": "wrexforge",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "WrexForge AI infrastructure workspace for Wrexer",
   "type": "module",
   "bin": {
